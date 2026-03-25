@@ -10,6 +10,7 @@ import yaml
 from fastapi import FastAPI
 from pydantic import BaseModel
 
+from data_pipeline.watcher import start_watcher_nonblocking
 from inference.context_builder import build_context, extract_source_ids
 from inference.domain_gate import DomainGate
 from inference.prompt import CHAT_FORMATS, build_chat_messages, format_for_completion
@@ -80,13 +81,14 @@ async def lifespan(app: FastAPI):
     cfg = load_config()
     _state["config"] = cfg
 
-    _state["retriever"] = Retriever(
+    retriever = Retriever(
         index_path=cfg["faiss"]["index_path"],
         metadata_path=cfg["faiss"]["metadata_path"],
         embedding_model_name=cfg["embedding"]["model_name"],
         top_k=cfg["retrieval"]["top_k"],
         relevance_threshold=cfg["retrieval"]["relevance_threshold"],
     )
+    _state["retriever"] = retriever
 
     _state["domain_gate"] = DomainGate(
         centroid_path=cfg["domain_gate"]["centroid_path"],
@@ -94,8 +96,21 @@ async def lifespan(app: FastAPI):
     )
 
     _state["llm"] = _load_llm(cfg)
+
+    observer = start_watcher_nonblocking(
+        watch_dir=cfg["data"]["watch_dir"],
+        docs_dir=cfg["data"]["docs_dir"],
+        output_dir=str(Path(cfg["faiss"]["index_path"]).parent),
+        retriever=retriever,
+        config=cfg,
+    )
+    _state["watcher"] = observer
+
     logger.info("Server ready — business: %s", cfg["business_name"])
     yield
+
+    observer.stop()
+    observer.join()
     _state.clear()
 
 
