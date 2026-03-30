@@ -22,6 +22,10 @@ templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 admin_app = FastAPI(title="BabyYoday Admin")
 
 
+@admin_app.get("/health")
+def health():
+    return {"status": "ok"}
+
 def _load_config() -> dict:
     path = CONFIG_PATH if CONFIG_PATH.exists() else LOCAL_CONFIG_PATH
     with open(path) as f:
@@ -73,9 +77,9 @@ async def dashboard(request: Request):
         recent_queries.reverse()
 
     return templates.TemplateResponse(
-        "dashboard.html",
-        {
-            "request": request,
+        request=request,
+        name="dashboard.html",
+        context={
             "business_name": cfg.get("business_name", "Unknown"),
             "docs": docs,
             "doc_count": len(docs),

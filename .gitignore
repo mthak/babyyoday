@@ -10,3 +10,5 @@ dist/
 build/
 *.egg-info/
 /tmp/
+cdk.out
+node_modules

@@ -81,19 +81,27 @@ async def lifespan(app: FastAPI):
     cfg = load_config()
     _state["config"] = cfg
 
-    retriever = Retriever(
-        index_path=cfg["faiss"]["index_path"],
-        metadata_path=cfg["faiss"]["metadata_path"],
-        embedding_model_name=cfg["embedding"]["model_name"],
-        top_k=cfg["retrieval"]["top_k"],
-        relevance_threshold=cfg["retrieval"]["relevance_threshold"],
-    )
-    _state["retriever"] = retriever
+    try:
+        retriever = Retriever(
+            index_path=cfg["faiss"]["index_path"],
+            metadata_path=cfg["faiss"]["metadata_path"],
+            embedding_model_name=cfg["embedding"]["model_name"],
+            top_k=cfg["retrieval"]["top_k"],
+            relevance_threshold=cfg["retrieval"]["relevance_threshold"],
+        )
+        _state["retriever"] = retriever
+    except Exception as e:
+        logger.warning("FAISS index not found — starting in index-pending mode: %s", e)
+        _state["retriever"] = None
 
-    _state["domain_gate"] = DomainGate(
-        centroid_path=cfg["domain_gate"]["centroid_path"],
-        similarity_threshold=cfg["domain_gate"]["similarity_threshold"],
-    )
+    try:
+        _state["domain_gate"] = DomainGate(
+            centroid_path=cfg["domain_gate"]["centroid_path"],
+            similarity_threshold=cfg["domain_gate"]["similarity_threshold"],
+        )
+    except Exception as e:
+        logger.warning("Domain gate centroid not found — gate disabled: %s", e)
+        _state["domain_gate"] = None
 
     _state["llm"] = _load_llm(cfg)
 
@@ -166,12 +174,13 @@ def _call_llm(llm, cfg: dict, context: str, query: str) -> str:
 @app.get("/health")
 def health():
     cfg = _state.get("config", {})
+    retriever = _state.get("retriever")
     return {
-        "status": "ok",
+        "status": "ok" if retriever is not None else "index-pending",
         "business": cfg.get("business_name", "unknown"),
         "model_loaded": _state.get("llm") is not None,
-        "model_path": cfg.get("model", {}).get("path", ""),
-        "index_size": _state["retriever"].index.ntotal if "retriever" in _state else 0,
+        "index_ready": retriever is not None,
+        "index_size": retriever.index.ntotal if retriever is not None else 0,
     }
 
 
@@ -179,21 +188,24 @@ def health():
 def query(req: QueryRequest):
     t0 = time.time()
     cfg = _state["config"]
-    retriever: Retriever = _state["retriever"]
-    gate: DomainGate = _state["domain_gate"]
+    retriever: Retriever = _state.get("retriever")
+    gate: DomainGate = _state.get("domain_gate")
 
+    if retriever is None:
+        return ErrorResponse(error="Index not ready yet. Please upload documents via the admin panel.")
     query_embedding = retriever.embed_query(req.query)
-    allowed, similarity = gate.check(query_embedding)
-
-    if not allowed:
-        return ErrorResponse(
-            error=(
-                f"I can only help with questions about {cfg['business_name']}. "
-                "How can I help with that?"
-            ),
-            domain_score=similarity,
-        )
-
+    if gate is not None:
+        allowed, similarity = gate.check(query_embedding)
+        if not allowed:
+            return ErrorResponse(
+                error=(
+                    f"I can only help with questions about {cfg['business_name']}. "
+                    "How can I help with that?"
+                ),
+                domain_score=similarity,
+            )
+    else:
+        similarity = 1.0
     chunks = retriever.search(req.query)
 
     if not chunks:
