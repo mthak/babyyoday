@@ -4,6 +4,7 @@ import csv
 import hashlib
 import io
 import logging
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -115,6 +116,25 @@ def chunk_text(
     return chunks
 
 
+# Matches lines like: "12/06  AMAZON MKTPL*ABC  Amzn.com/bill WA  8.81"
+_TRANSACTION_LINE = re.compile(
+    r"^\d{2}/\d{2}\s+\S+.*\d+\.\d{2}\s*$", re.MULTILINE
+)
+
+
+def _enrich_chunk(text: str, source_name: str) -> str:
+    """Prepend a semantic label to chunks that contain transaction data.
+
+    This bridges the vocabulary gap between natural-language queries
+    ('largest purchases', 'restaurant spending') and raw statement lines
+    ('12/06 GRUBHUB 79.53') so the embedding model can match them.
+    """
+    transaction_lines = _TRANSACTION_LINE.findall(text)
+    if len(transaction_lines) >= 2:
+        return f"Credit card transactions — purchases, charges, and payments:\n{text}"
+    return text
+
+
 def process_file(
     path: Path,
     chunk_size: int = 400,
@@ -127,9 +147,10 @@ def process_file(
     raw_chunks = chunk_text(text, chunk_size, chunk_overlap)
     result: list[Chunk] = []
     for i, text_chunk in enumerate(raw_chunks):
+        enriched = _enrich_chunk(text_chunk, path.name)
         result.append(
             Chunk(
-                text=text_chunk,
+                text=enriched,
                 source_id=_make_source_id(path, i),
                 source_name=path.name,
                 chunk_index=i,

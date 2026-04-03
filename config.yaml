@@ -1,26 +1,27 @@
-business_name: "Sweet Rise Bakery"
-business_type: "bakery"
+business_name: "Manoj Personal Finance"
+business_type: "personal_finance"
 
 model:
-  path: "./models/model.gguf"
-  n_ctx: 2048
-  n_gpu_layers: 0
+  path: "./models/Phi-3.1-mini-128k-instruct-Q4_K_M.gguf"
+  ollama_model: "phi3-finance"
+  n_ctx: 4096
+  max_tokens: 256
   temperature: 0.3
 
 embedding:
-  model_name: "all-MiniLM-L6-v2"
+  model_name: "sentence-transformers/all-MiniLM-L6-v2"
 
 retrieval:
-  top_k: 5
-  relevance_threshold: 0.3
+  top_k: 12
+  relevance_threshold: 0.10
 
 domain_gate:
-  similarity_threshold: 0.20
-  centroid_path: "./data/centroid.npy"
+  similarity_threshold: -1.0
+  centroid_path: "./data/output/centroid.npy"
 
 faiss:
-  index_path: "./data/faiss.index"
-  metadata_path: "./data/metadata.json"
+  index_path: "./data/output/faiss.index"
+  metadata_path: "./data/output/metadata.json"
 
 chunking:
   chunk_size: 400
@@ -35,7 +36,15 @@ admin:
 
 data:
   watch_dir: "./data/incoming"
-  docs_dir: "./data/docs"
+  docs_dir: "./data/docs/credit_cards"
 
 logging:
   query_log: "./data/query_log.jsonl"
+
+# Summarizer: the LLM reads each document at index time and generates
+# a rich natural-language summary chunk automatically.
+# No categories or patterns needed — works for any domain.
+
+paths:
+  docs_dir: "./data/docs/credit_cards"
+  index_dir: "./data"

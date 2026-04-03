@@ -8,7 +8,7 @@ from typing import List
 
 import faiss
 import numpy as np
-from sentence_transformers import SentenceTransformer
+from fastembed import TextEmbedding
 
 logger = logging.getLogger(__name__)
 
@@ -26,15 +26,15 @@ class Retriever:
         self,
         index_path: str,
         metadata_path: str,
-        embedding_model_name: str = "all-MiniLM-L6-v2",
+        embedding_model_name: str = "sentence-transformers/all-MiniLM-L6-v2",
         top_k: int = 5,
         relevance_threshold: float = 0.3,
     ):
         self.top_k = top_k
         self.relevance_threshold = relevance_threshold
 
-        logger.info("Loading embedding model: %s", embedding_model_name)
-        self.embedding_model = SentenceTransformer(embedding_model_name)
+        logger.info("Loading embedding model (ONNX/CPU): %s", embedding_model_name)
+        self.embedding_model = TextEmbedding(embedding_model_name)
 
         logger.info("Loading FAISS index from: %s", index_path)
         self.index = faiss.read_index(index_path)
@@ -55,7 +55,8 @@ class Retriever:
         logger.info("Index reloaded — %d chunks", self.index.ntotal)
 
     def embed_query(self, query: str) -> np.ndarray:
-        return self.embedding_model.encode([query], normalize_embeddings=True)
+        embeddings = list(self.embedding_model.embed([query]))
+        return np.array(embeddings, dtype=np.float32)
 
     def search(self, query: str) -> list[RetrievedChunk]:
         query_vector = self.embed_query(query)

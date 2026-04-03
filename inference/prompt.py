@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import datetime
+
 # System prompt used both during inference and as the LoRA training instruction.
 # Keeping them identical ensures the fine-tuned model behaves the same as at inference.
 SYSTEM_TEMPLATE = (
-    "You are {business_name}'s assistant. "
+    "You are {business_name}'s personal finance assistant. "
+    "Today's date is {today}. "
+    "The context below contains extracted text from bank and credit card statements. "
     "Answer ONLY using the provided context. "
     "If the context does not contain enough information to answer, "
     'say "I don\'t have that information." '
@@ -26,7 +30,8 @@ CHAT_FORMATS = {
 
 
 def build_system_prompt(business_name: str) -> str:
-    return SYSTEM_TEMPLATE.format(business_name=business_name)
+    today = datetime.date.today().strftime("%B %d, %Y")
+    return SYSTEM_TEMPLATE.format(business_name=business_name, today=today)
 
 
 def build_user_prompt(context: str, query: str) -> str:
