@@ -1,0 +1,39 @@
+# LoRA fine-tuning config for Phi-3-mini-4k-instruct
+# Runs on: Mac Mini M2 8GB, AWS Lightsail 8GB, any machine with 8GB+ RAM
+# Train time: ~30 min on M2, ~2h on CPU
+
+base_model: "microsoft/Phi-3-mini-4k-instruct"
+model_family: "phi3"
+
+training_data: "./data/training_data.jsonl"
+output_dir:    "./models/phi3_lora_adapter/"
+
+quantization:
+  load_in_4bit: true        # QLoRA — halves memory usage
+
+lora:
+  r: 16                     # rank — higher = more capacity, more memory
+  lora_alpha: 32            # scaling factor (usually 2x r)
+  lora_dropout: 0.05
+  bias: "none"
+  target_modules:           # Phi-3 attention projection layers
+    - "qkv_proj"
+    - "o_proj"
+    - "gate_up_proj"
+    - "down_proj"
+
+training:
+  epochs: 3
+  batch_size: 2
+  gradient_accumulation_steps: 4    # effective batch = 8
+  learning_rate: 2.0e-4
+  weight_decay: 0.001
+  max_grad_norm: 0.3
+  warmup_ratio: 0.03
+  lr_scheduler: "cosine"
+  max_seq_length: 1024
+  packing: false
+  val_split: 0.1
+  logging_steps: 10
+  save_steps: 50
+  eval_steps: 50

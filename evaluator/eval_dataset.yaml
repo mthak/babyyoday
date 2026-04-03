@@ -1,0 +1,134 @@
+# Evaluation dataset for Sweet Rise Bakery agent
+#
+# Each case has:
+#   id              : unique identifier
+#   query           : the customer's question
+#   expected_pass   : true = should get an answer, false = should be rejected
+#   expected_sources: list of document filenames that MUST appear in retrieved chunks
+#   expected_answer : reference answer (used for semantic similarity if LLM loaded)
+#   category        : what is being tested (used to group results)
+
+cases:
+
+  # ── IN-DOMAIN: should be answered ──────────────────────────────────────
+
+  - id: "IN-001"
+    category: "menu"
+    query: "Do you have vegan cakes?"
+    expected_pass: true
+    expected_sources: ["allergens.txt", "menu.txt"]
+    expected_answer: "Yes, we have vegan options including the Chocolate Avocado Cake and Coconut Berry Tart."
+
+  - id: "IN-002"
+    category: "allergens"
+    query: "Are there any nut-free options?"
+    expected_pass: true
+    expected_sources: ["allergens.txt"]
+    expected_answer: "Yes, the Vanilla Cloud Cake and Lemon Drizzle Cake are prepared in a nut-free area."
+
+  - id: "IN-003"
+    category: "allergens"
+    query: "Is anything gluten free?"
+    expected_pass: true
+    expected_sources: ["allergens.txt"]
+    expected_answer: "The Gluten-Free Chocolate Cupcake and Coconut Berry Tart are gluten-free."
+
+  - id: "IN-004"
+    category: "hours"
+    query: "What time do you open on Saturday?"
+    expected_pass: true
+    expected_sources: ["hours_and_policies.txt"]
+    expected_answer: "We open at 8:00 AM on Saturday and close at 5:00 PM."
+
+  - id: "IN-005"
+    category: "hours"
+    query: "Are you open on Sundays?"
+    expected_pass: true
+    expected_sources: ["hours_and_policies.txt"]
+    expected_answer: "Yes, we are open on Sundays from 8:00 AM to 3:00 PM."
+
+  - id: "IN-006"
+    category: "pricing"
+    query: "How much does a sourdough loaf cost?"
+    expected_pass: true
+    expected_sources: ["menu.txt"]
+    expected_answer: "The sourdough loaf costs $7.00."
+
+  - id: "IN-007"
+    category: "ordering"
+    query: "How far in advance do I need to order a custom cake?"
+    expected_pass: true
+    expected_sources: ["hours_and_policies.txt"]
+    expected_answer: "You need at least 48 hours notice for custom cakes and 2 weeks for wedding cakes."
+
+  - id: "IN-008"
+    category: "ordering"
+    query: "What is your cancellation policy for custom cake orders?"
+    expected_pass: true
+    expected_sources: ["hours_and_policies.txt"]
+    expected_answer: "Cancellations more than 24 hours before pickup receive a full deposit refund. Less than 24 hours, the deposit is non-refundable."
+
+  - id: "IN-009"
+    category: "loyalty"
+    query: "How does your loyalty program work?"
+    expected_pass: true
+    expected_sources: ["hours_and_policies.txt"]
+    expected_answer: "You earn 1 point per dollar spent. 100 points equals $5 off. You get double points in your birthday month and a free cupcake on your birthday."
+
+  - id: "IN-010"
+    category: "menu"
+    query: "What drinks do you serve?"
+    expected_pass: true
+    expected_sources: ["menu.txt"]
+    expected_answer: "We serve drip coffee, lattes, cappuccinos, hot chocolate, and fresh orange juice."
+
+  - id: "IN-011"
+    category: "allergens"
+    query: "Can I get oat milk in my coffee?"
+    expected_pass: true
+    expected_sources: ["allergens.txt"]
+    expected_answer: "Yes, all drinks can be made with oat milk at no extra charge."
+
+  - id: "IN-012"
+    category: "catering"
+    query: "Do you do catering for events?"
+    expected_pass: true
+    expected_sources: ["hours_and_policies.txt"]
+    expected_answer: "Yes, we offer catering for events of 20 or more people with pastry platters, full breakfast spreads, and dessert tables."
+
+  # ── OUT-OF-DOMAIN: should be rejected ──────────────────────────────────
+
+  - id: "OUT-001"
+    category: "off_topic"
+    query: "What is the capital of France?"
+    expected_pass: false
+    expected_sources: []
+    expected_answer: null
+
+  - id: "OUT-002"
+    category: "off_topic"
+    query: "Write me a Python script to sort a list"
+    expected_pass: false
+    expected_sources: []
+    expected_answer: null
+
+  - id: "OUT-003"
+    category: "off_topic"
+    query: "Who won the World Cup in 2022?"
+    expected_pass: false
+    expected_sources: []
+    expected_answer: null
+
+  - id: "OUT-004"
+    category: "off_topic"
+    query: "Tell me a joke"
+    expected_pass: false
+    expected_sources: []
+    expected_answer: null
+
+  - id: "OUT-005"
+    category: "off_topic"
+    query: "What is the best programming language?"
+    expected_pass: false
+    expected_sources: []
+    expected_answer: null

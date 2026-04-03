@@ -1,0 +1,42 @@
+# LoRA fine-tuning config for Mistral-7B-Instruct-v0.2
+# Runs on: Mac Mini M2 16GB, AWS Lightsail 16GB, machine with 12GB+ RAM
+# Train time: ~1h on M2 with MPS, ~4h on CPU
+
+base_model: "mistralai/Mistral-7B-Instruct-v0.2"
+model_family: "mistral"
+
+training_data: "./data/training_data.jsonl"
+output_dir:    "./models/mistral_lora_adapter/"
+
+quantization:
+  load_in_4bit: true
+
+lora:
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  bias: "none"
+  target_modules:           # Mistral attention + MLP layers
+    - "q_proj"
+    - "k_proj"
+    - "v_proj"
+    - "o_proj"
+    - "gate_proj"
+    - "up_proj"
+    - "down_proj"
+
+training:
+  epochs: 3
+  batch_size: 2
+  gradient_accumulation_steps: 4
+  learning_rate: 2.0e-4
+  weight_decay: 0.001
+  max_grad_norm: 0.3
+  warmup_ratio: 0.03
+  lr_scheduler: "cosine"
+  max_seq_length: 1024
+  packing: false
+  val_split: 0.1
+  logging_steps: 10
+  save_steps: 50
+  eval_steps: 50
