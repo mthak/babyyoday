@@ -289,6 +289,114 @@ bl.setStyle(TableStyle([
     ("RIGHTPADDING",  (0,0),(-1,-1), 8),
 ]))
 story.append(bl)
+story.append(Spacer(1, 8))
+
+# ── HONEST SUMMARY ────────────────────────────────────────────────────────────
+story.append(p("THE HONEST ANSWER", sect_s))
+story.append(HRFlowable(width="100%", thickness=1.5, color=GOLD))
+story.append(Spacer(1, 5))
+
+honest_rows = [
+    [p("", ch_s), p("Index Fund", ch_s), p("IUL", ch_s)],
+    [p("Your cash invested", body_s),
+     p("$1,000,000  (real money, from your pocket, yrs 1–10)", body_s),
+     p("$0  (lender pays everything — you never write a check)", body_s)],
+    [p("Balance at age 80", body_s),
+     p("~$11.4M  (gross, before any tax)", body_s),
+     p("~$2.6M cash value", body_s)],
+    [p("Tax on withdrawals", body_s),
+     p("Yes — capital gains tax owed every year you withdraw", body_s),
+     p("No — policy loans are tax-free income", body_s)],
+    [p("Death benefit\nto heirs", body_s),
+     p("Whatever is in your account\n(taxable as part of estate)", body_s),
+     p("$3.6M at age 80, growing —\nincome-tax-free to your heirs", body_s)],
+]
+ht = Table(honest_rows, colWidths=[1.6*inch, 2.9*inch, 2.9*inch])
+ht.setStyle(TableStyle([
+    ("BACKGROUND",    (0,0),(-1,0), NAVY),
+    ("BACKGROUND",    (0,1),(0,-1), colors.HexColor("#D6E4F0")),
+    ("ROWBACKGROUNDS",(0,1),(-1,-1), [LIGHT, WHITE]),
+    ("TOPPADDING",    (0,0),(-1,-1), 5),
+    ("BOTTOMPADDING", (0,0),(-1,-1), 5),
+    ("LEFTPADDING",   (0,0),(-1,-1), 7),
+    ("RIGHTPADDING",  (0,0),(-1,-1), 7),
+    ("GRID",          (0,0),(-1,-1), 0.3, colors.HexColor("#CCCCCC")),
+    ("VALIGN",        (0,0),(-1,-1), "TOP"),
+]))
+story.append(ht)
+story.append(Spacer(1, 7))
+
+# Key insight boxes
+insight_left = Table([
+    [p("INDEX FUND WINS IF...", S("ihl", fontSize=8, fontName="Helvetica-Bold", textColor=WHITE, alignment=TA_CENTER))],
+    [p(
+        "• You have $1M available to invest\n"
+        "• You are comfortable with market volatility\n"
+        "• You want maximum liquid wealth\n"
+        "• You don't need a death benefit\n"
+        "• You can manage the annual tax drag on withdrawals",
+        S("ibl", fontSize=7.5, fontName="Helvetica", textColor=colors.HexColor("#222222"), leading=12))],
+], colWidths=[3.55*inch])
+insight_left.setStyle(TableStyle([
+    ("BACKGROUND",    (0,0),(-1,0), NAVY),
+    ("BACKGROUND",    (0,1),(-1,-1), LIGHT),
+    ("BOX",           (0,0),(-1,-1), 1, NAVY),
+    ("TOPPADDING",    (0,0),(-1,-1), 6),
+    ("BOTTOMPADDING", (0,0),(-1,-1), 6),
+    ("LEFTPADDING",   (0,0),(-1,-1), 8),
+    ("RIGHTPADDING",  (0,0),(-1,-1), 8),
+    ("VALIGN",        (0,0),(-1,-1), "TOP"),
+]))
+
+insight_right = Table([
+    [p("IUL WINS IF...", S("ihr", fontSize=8, fontName="Helvetica-Bold", textColor=WHITE, alignment=TA_CENTER))],
+    [p(
+        "• You want to invest $0 of your own money\n"
+        "• You want tax-free retirement income\n"
+        "• You want a large tax-free death benefit for heirs\n"
+        "• You have better uses for that $1M\n"
+        "• You want protection from market downturns (0% floor)",
+        S("ibr", fontSize=7.5, fontName="Helvetica", textColor=colors.HexColor("#222222"), leading=12))],
+], colWidths=[3.55*inch])
+insight_right.setStyle(TableStyle([
+    ("BACKGROUND",    (0,0),(-1,0), GREEN),
+    ("BACKGROUND",    (0,1),(-1,-1), LGRN),
+    ("BOX",           (0,0),(-1,-1), 1, GREEN),
+    ("TOPPADDING",    (0,0),(-1,-1), 6),
+    ("BOTTOMPADDING", (0,0),(-1,-1), 6),
+    ("LEFTPADDING",   (0,0),(-1,-1), 8),
+    ("RIGHTPADDING",  (0,0),(-1,-1), 8),
+    ("VALIGN",        (0,0),(-1,-1), "TOP"),
+]))
+
+insight_tbl = Table([[insight_left, Spacer(0.3*inch,1), insight_right]],
+                    colWidths=[3.55*inch, 0.3*inch, 3.55*inch])
+insight_tbl.setStyle(TableStyle([
+    ("VALIGN",        (0,0),(-1,-1), "TOP"),
+    ("TOPPADDING",    (0,0),(-1,-1), 0),
+    ("BOTTOMPADDING", (0,0),(-1,-1), 0),
+    ("LEFTPADDING",   (0,0),(-1,-1), 0),
+    ("RIGHTPADDING",  (0,0),(-1,-1), 0),
+]))
+story.append(insight_tbl)
+story.append(Spacer(1, 7))
+
+# Final one-liner
+final = Table([[p(
+    "THE REAL QUESTION IS NOT 'which grows more' — it is: "
+    "would you rather put $1,000,000 of your own money to work in the market, "
+    "or put $0 in and use the bank's money while keeping your $1M free for other opportunities?",
+    S("fin", fontSize=8, fontName="Helvetica-Bold", textColor=NAVY, leading=12, alignment=TA_CENTER))
+]], colWidths=[7.4*inch])
+final.setStyle(TableStyle([
+    ("BACKGROUND",    (0,0),(-1,-1), LGOLD),
+    ("BOX",           (0,0),(-1,-1), 1.2, GOLD),
+    ("TOPPADDING",    (0,0),(-1,-1), 8),
+    ("BOTTOMPADDING", (0,0),(-1,-1), 8),
+    ("LEFTPADDING",   (0,0),(-1,-1), 10),
+    ("RIGHTPADDING",  (0,0),(-1,-1), 10),
+]))
+story.append(final)
 story.append(Spacer(1, 5))
 
 story.append(HRFlowable(width="100%", thickness=0.5, color=GRAY))
