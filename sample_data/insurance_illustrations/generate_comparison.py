@@ -6,10 +6,10 @@ Side-by-side comparison:
 Swati Chugh | Age 43 today | Starting Year = Policy Year 1
 
 Assumptions for Index Fund:
-  - $100,000/yr invested for 10 years (matching the "out of pocket" feel of what you COULD spend)
+  - $100,000/yr invested for 10 years ONLY (years 1-10), then STOPS
+  - Total invested: $1,000,000 from your pocket
   - Gross annual return: 9% (broad S&P 500 long-run average, before tax)
-  - Long-term capital gains tax: 20% on gains (federal, rough California blended ~23.8% LTCG+NIIT)
-    We use 20% federal for conservative-but-realistic comparison.
+  - Long-term capital gains tax: 20% on gains (federal)
   - Annual expense ratio: 0.05% (index ETF)
   - Dividends reinvested, taxed at 15% each year (~2% dividend yield)
   - At distribution: gains taxed at 20% LTCG on the gain portion
@@ -17,14 +17,14 @@ Assumptions for Index Fund:
 Assumptions for IUL:
   - $0 out of pocket ever
   - Policy credited at 7.19% (from illustration)
-  - Year 20: loan of $5.237M repaid from policy cash value → net cash $1,348,332
+  - Year 20: loan of $5.237M repaid from policy cash value -> net cash $1,348,332
   - Year 21 onward: distributions as policy loans (tax-free)
   - Illustrated distribution: $204,086/yr; your scenario: $150,000/yr
   - Values pulled directly from Lincoln illustration
 
 Age at start: 43
-Year 20 → age 63
-Age 80 → year 37 of policy
+Year 20 -> age 63
+Age 80 -> year 37 of policy
 """
 
 from reportlab.lib.pagesizes import letter
@@ -278,7 +278,7 @@ assum_data = [
      p("Index Fund (Taxable)", col_hdr_s),
      p("Lincoln WealthBuilder IUL", col_hdr_s)],
     [p("Your cash outlay", body_s),
-     p("$100,000 / year for 10 years\n(total $1,000,000 from your pocket)", body_s),
+     p("$100,000 / year for Years 1–10 ONLY\n(total $1,000,000 from your pocket — then stops)", body_s),
      p("$0 — premiums financed by lender\n(zero out of pocket, ever)", body_s)],
     [p("Growth rate", body_s),
      p("9% gross / ~8.95% net (S&P 500 avg, before tax)", body_s),
@@ -319,11 +319,11 @@ iUL_20_cv, iUL_20_db = IUL_VALUES[20]
 
 y20_data = [
     [p("", col_hdr_s), p("Index Fund", col_hdr_s), p("IUL", col_hdr_s)],
-    [p("Total cash you put in",      body_s), p("$1,000,000", body_s), p("$0", body_s)],
-    [p("Gross account value",        body_s), p(fmt(f20["gross_value"]), body_s), p("$6,151,469 (pre-loan-repayment)", body_s)],
-    [p("Tax cost to access all of it",body_s),p(fmt(f20["gross_value"]-f20["after_tax_value"]) + " (cap gains)", body_s), p("$0 (loans are tax-free)", body_s)],
-    [p("Spendable / net value",       body_s), p(fmt(f20["after_tax_value"]), body_s), p("$1,348,332 (after $5.24M loan repaid)", body_s)],
-    [p("Death benefit to heirs",      body_s), p("Your account balance (taxable to heirs)", body_s), p("$3,088,987 (income-tax-free to heirs)", body_s)],
+    [p("Total cash YOU put in",       body_s), p("$1,000,000  (yrs 1–10 only, then stops)", body_s), p("$0  (lender paid everything)", body_s)],
+    [p("Gross account value",         body_s), p("$3,787,544", body_s), p("$6,151,469  (pre-loan-repayment)", body_s)],
+    [p("Tax cost to access all of it",body_s), p("~$449,417  (capital gains tax)", body_s), p("$0  (loans are tax-free)", body_s)],
+    [p("Spendable / net value",        body_s), p("$3,338,127", body_s), p("$1,348,332  (after $5.24M loan repaid)", body_s)],
+    [p("Death benefit to heirs",       body_s), p("~$3.8M  (taxable estate asset)", body_s), p("$3,088,987  (income-tax-free to heirs)", body_s)],
 ]
 y20t = Table(y20_data, colWidths=[2.2*inch, 2.65*inch, 2.65*inch])
 y20t.setStyle(TableStyle([
@@ -422,17 +422,17 @@ callout_data = [[
     Table([
         [p("INDEX FUND @ AGE 80", S("cah", fontSize=8, fontName="Helvetica-Bold",
                                     textColor=WHITE, alignment=TA_CENTER))],
-        [p(f"After-tax balance: {fmt(fund_80)}", S("cav", fontSize=11,
-            fontName="Helvetica-Bold", textColor=RED, alignment=TA_CENTER))],
-        [p("(After 17 yrs of $150k/yr withdrawals\n+ paying capital gains tax each year)", small_s)],
+        [p("After-tax balance: $8,085,583", S("cav", fontSize=11,
+            fontName="Helvetica-Bold", textColor=GREEN, alignment=TA_CENTER))],
+        [p("After 17 yrs of $150k/yr net withdrawals.\nYou invested $1,000,000 total (yrs 1-10 only).\n~$27k/yr in capital gains taxes paid.", small_s)],
     ], colWidths=[3.55*inch]),
 
     Table([
         [p("IUL @ AGE 80", S("cah2", fontSize=8, fontName="Helvetica-Bold",
                               textColor=WHITE, alignment=TA_CENTER))],
-        [p(f"Cash value: {fmt(iUL_80_cv)}", S("cav2", fontSize=11,
+        [p("Cash value: $2,564,940", S("cav2", fontSize=11,
             fontName="Helvetica-Bold", textColor=GREEN, alignment=TA_CENTER))],
-        [p(f"Death benefit to heirs: {fmt(iUL_80_db)}\n(All tax-free. $0 invested.)", small_s)],
+        [p("Death benefit to heirs: $3,619,392  (income-tax-free)\nYou invested $0. All distributions tax-free.", small_s)],
     ], colWidths=[3.55*inch]),
 ]]
 
@@ -461,9 +461,11 @@ story.append(Spacer(1, 7))
 
 # ── BOTTOM INSIGHT ────────────────────────────────────────────────────────────
 insight_data = [[p(
-    "THE BOTTOM LINE:  The index fund starts with $1M of your own money and still produces comparable or smaller spendable wealth at age 80, "
-    "after paying capital gains taxes every year.  The IUL starts with $0 from your pocket — the lender funds everything — "
-    "and leaves you with a growing cash value plus a multi-million-dollar death benefit your heirs receive income-tax-free.",
+    "THE BOTTOM LINE:  If you invest $100k/yr for just 10 years (total $1M out of pocket) into an index fund at 9%/yr and then "
+    "withdraw $150k/yr from age 64, you still have ~$8M after-tax at age 80 — the fund keeps growing faster than you draw.  "
+    "The IUL leaves ~$2.6M in cash value at age 80 (plus a $3.6M death benefit to heirs, tax-free) but costs you nothing.  "
+    "The honest trade-off: the index fund builds more personal liquid wealth if you can stomach the $1M upfront and annual tax drag — "
+    "the IUL wins on zero cash outlay, tax-free income, and a guaranteed death benefit your heirs receive tax-free.",
     S("ins", fontSize=7.5, fontName="Helvetica", textColor=NAVY, leading=11))]]
 it = Table(insight_data, colWidths=[7.5*inch])
 it.setStyle(TableStyle([
